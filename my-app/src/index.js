@@ -3,24 +3,22 @@ import ReactDOM from "react-dom";
 import "./index.css";
 
 class Square extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: this.props.value
-    };
-  }
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     value: this.props.value
+  //   };
+  // }
   render() {
-    console.log(this);
+    console.log(this.props);
     return (
       <button
         className="square"
         onClick={() => {
-          this.setState({
-            value: "X"
-          });
+          this.props.onClickaaaa(new Date()); //引数で親に渡す
         }}
       >
-        {this.state.value}
+        {this.props.value}
       </button>
     );
   }
@@ -35,8 +33,21 @@ class Board extends React.Component {
     };
   }
   renderSquare(i) {
-    return <Square value={this.state.squares[i]} />;
+    return (
+      <Square
+        value={this.state.squares[i]}
+        onClickaaaa={day => {
+          // ここの()で子から受け取った内容を取れる
+          this.handleClick(day);
+        }}
+      />
+    );
   }
+
+  handleClick(i) {
+    alert(i);
+  }
+
   render() {
     const status = "Next player: X";
 
