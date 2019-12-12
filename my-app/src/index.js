@@ -9,7 +9,7 @@ function Square(props) {
       <button
         className="square"
         onClick={() => {
-          props.onClickaaaa(); //引数で親に渡す
+          props.onClick(); //引数で親に渡す
         }}
       >
         {props.value}
@@ -19,34 +19,16 @@ function Square(props) {
 }
 
 class Board extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      color: "red",
-      squares: Array(9).fill(null), // fillは要素を固定値で設定
-      xIsNest: true
-    };
-  }
-
   renderSquare(i) {
     return (
       <Square
-        value={this.state.squares[i]}
-        onClickaaaa={() => {
+        value={this.props.squares[i]}
+        onClick={() => {
           // ここの()で子から受け取った内容を取れる
-          this.handleClick(i);
+          this.props.onClick(i);
         }}
       />
     );
-  }
-
-  handleClick(i) {
-    const squares = this.state.squares; //配列全体を切り出して新しく配列を生成
-    squares[i] = this.state.xIsNest ? "X" : "O";
-    this.setState({
-      squares: squares,
-      xIsNest: !this.state.xIsNest
-    }); //配列全体を新しいstateとして設置
   }
 
   axiosStart(i) {
@@ -66,37 +48,8 @@ class Board extends React.Component {
   }
 
   render() {
-    const winner = calculateWinner(this.state.squares);
-    let status;
-    if (winner) {
-      status = "Winner: " + winner;
-    } else {
-      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
-    }
-      
-      console.log(winner);
     return (
       <div>
-        <p style={{ color: this.state.color }}>{this.props.text}</p>
-        {this.state.color}
-
-        <button
-          onClick={() => {
-            this.setState({ color: "blue" });
-          }}
-        >
-          色変え
-        </button>
-
-        <button
-          onClick={() => {
-            alert(this.state.color);
-          }}
-        >
-          alert
-        </button>
-
-        <div className="status">{status}</div>
         <div className="board-row">
           {this.renderSquare(0)}
           {this.renderSquare(1)}
@@ -118,15 +71,55 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      history: [
+        {
+          squares: Array(9).fill(null)
+        }
+      ],
+      xIsNext: true
+    };
+  }
+
+  handleClick(i) {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const squares = current.squares.slice();
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+    squares[i] = this.state.xIsNext ? "X" : "O";
+    this.setState({
+      history: history.concat([
+        {
+          squares: squares
+        }
+      ]),
+      xIsNext: !this.state.xIsNext
+    });
+  }
   render() {
+    const history = this.state.history;
+    const current = history[history.length - 1];
+    const winner = calculateWinner(current.squares);
+
+    let status;
+    if (winner) {
+      status = "Winner: " + winner;
+    } else {
+      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+    }
+
     return (
       <div className="game">
         <div className="game-board">
           <h1>Hello Game!!</h1>
-          <Board text={"こんにちわ"} />
+          <Board squares={current.squares} onClick={i => this.handleClick(i)} />
         </div>
         <div className="game-info">
-          <div>{/* status */}</div>
+          <div>{status}</div>
           <ol>{/* TODO */}</ol>
         </div>
       </div>
